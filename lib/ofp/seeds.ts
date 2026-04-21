@@ -1,4 +1,4 @@
-﻿import type { FlightPlan, MCPValue, OFPConfig, VNEValue, VoiceScript } from "./types";
+import type { AircraftProfile, FlightPlan, MCPValue, OFPConfig, VNEValue, VoiceScript } from "./types";
 
 const paList = [0, 2000, 4000, 6000, 8000, 10000, 12000];
 const tempList = [-30, -20, -10, 0, 10, 20, 30, 40];
@@ -28,7 +28,14 @@ export const defaultVoiceScripts: VoiceScript[] = [
   { location: "Tower Departure", callText: "HB-ZYO ready for departure, VFR to destination." },
   { location: "Arrival", callText: "HB-ZYO, inbound for landing with information." },
 ];
-
+export const defaultAircraftProfiles: AircraftProfile[] = [
+  {
+    registration: "HB-ZYO",
+    emptyMass_lbs: 1515,
+    longCg_in: 106.5,
+    mtw_lbs: 2500,
+  },
+];
 export const defaultConfig: OFPConfig = {
   mcpTable: { paList, tempList, grid: mcpGrid },
   vneTable: { paList, tempList, grid: vneGrid },
@@ -154,5 +161,7 @@ export const defaultPlan: FlightPlan = {
     },
   ],
 };
+
+
 
 
