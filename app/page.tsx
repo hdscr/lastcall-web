@@ -1,20 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
-import { Suspense } from "react";
+﻿import { createClient } from "@/lib/supabase/server";
+import { FlightPlanEditor, type PlanListItem } from "./components/flight-plan-editor";
 
-async function InstrumentsData() {
+export default async function Home() {
   const supabase = await createClient();
-  const { data: instruments } = await supabase.from("instruments").select();
+  const { data } = await supabase
+    .from("flight_plans")
+    .select("id, aircraft_type, registration, from_icao, to_icao, flight_date, pilots, created_at")
+    .order("flight_date", { ascending: false });
 
-  return <pre>{JSON.stringify(instruments, null, 2)}</pre>;
-}
-
-export default function Home() {
-  return (
-    <main>
-      <h1>Jetzt funzt es gugus</h1>
-      <Suspense fallback={<div>Loading instruments...</div>}>
-        <InstrumentsData />
-      </Suspense>
-    </main>
-  );
+  return <FlightPlanEditor initialSavedPlans={(data as PlanListItem[]) ?? []} />;
 }
