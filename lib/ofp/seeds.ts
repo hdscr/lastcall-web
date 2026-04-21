@@ -51,6 +51,24 @@ export const defaultConfig: OFPConfig = {
       longMax: 110,
       latMin: -10,
       latMax: 10,
+      // Approximate default shape; replace with exact R44 POH points when available.
+      longitudinalPoints: [
+        { x: 95.5, y: 1500 },
+        { x: 95.5, y: 2100 },
+        { x: 97.0, y: 2400 },
+        { x: 101.5, y: 2500 },
+        { x: 104.5, y: 2500 },
+        { x: 106.0, y: 2200 },
+        { x: 106.0, y: 1500 },
+      ],
+      lateralPoints: [
+        { x: -12, y: 1500 },
+        { x: -11, y: 2200 },
+        { x: -9, y: 2500 },
+        { x: 9, y: 2500 },
+        { x: 11, y: 2200 },
+        { x: 12, y: 1500 },
+      ],
     },
   },
 };
