@@ -82,16 +82,27 @@ export function HOGEChart({ lines }: Props) {
         <line x1={left} y1={height - bottom} x2={width - right} y2={height - bottom} stroke="#0f172a" strokeWidth="1.5" />
 
         {lines.map((line) => (
-          <line
-            key={line.id}
-            x1={xToSvg(line.x1, width, left, right)}
-            y1={yToSvg(line.y1, height, top, bottom)}
-            x2={xToSvg(line.x2, width, left, right)}
-            y2={yToSvg(line.y2, height, top, bottom)}
-            stroke={strokeColor(line.color)}
-            strokeWidth={strokeWidth(line.width)}
-            strokeDasharray={strokeDash(line.style)}
-          />
+          <g key={line.id}>
+            <line
+              x1={xToSvg(line.x1, width, left, right)}
+              y1={yToSvg(line.y1, height, top, bottom)}
+              x2={xToSvg(line.x2, width, left, right)}
+              y2={yToSvg(line.y2, height, top, bottom)}
+              stroke={strokeColor(line.color)}
+              strokeWidth={strokeWidth(line.width)}
+              strokeDasharray={strokeDash(line.style)}
+            />
+            {line.showTitle ? (
+              <text
+                x={xToSvg(line.x1, width, left, right) + 6}
+                y={yToSvg(line.y1, height, top, bottom) - 6}
+                fontSize="11"
+                fill={strokeColor(line.color)}
+              >
+                {line.title}
+              </text>
+            ) : null}
+          </g>
         ))}
 
         <text

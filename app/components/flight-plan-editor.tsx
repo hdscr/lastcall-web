@@ -26,19 +26,19 @@ const LAT_ENV_KEY = "ofp_cg_lat_envelope";
 const HOGE_LINES_KEY = "ofp_hoge_lines";
 
 const defaultHogeLines: HOGELineConfig[] = [
-  { id: "l1", x1: 1900, y1: 14.0, x2: 2500, y2: 7.25, color: "schwarz", style: "durchgehend", width: "mittel" },
-  { id: "l2", x1: 1929, y1: 13.02, x2: 2500, y2: 6.64, color: "schwarz", style: "durchgehend", width: "mittel" },
-  { id: "l3", x1: 1957, y1: 12.08, x2: 2500, y2: 6.04, color: "schwarz", style: "durchgehend", width: "mittel" },
-  { id: "l4", x1: 1986, y1: 11.1, x2: 2500, y2: 5.43, color: "schwarz", style: "durchgehend", width: "mittel" },
-  { id: "l5", x1: 2013, y1: 10.19, x2: 2500, y2: 4.82, color: "schwarz", style: "durchgehend", width: "mittel" },
-  { id: "l6", x1: 2041, y1: 9.24, x2: 2500, y2: 4.22, color: "schwarz", style: "durchgehend", width: "mittel" },
-  { id: "l7", x1: 2069, y1: 8.3, x2: 2500, y2: 3.61, color: "schwarz", style: "durchgehend", width: "mittel" },
-  { id: "l8", x1: 2097, y1: 7.35, x2: 2500, y2: 3.0, color: "schwarz", style: "durchgehend", width: "mittel" },
-  { id: "h1", x1: 2500, y1: 4.9, x2: 2490, y2: 5.54, color: "schwarz", style: "durchgehend", width: "fein" },
-  { id: "h2", x1: 2500, y1: 3.95, x2: 2475, y2: 5.097372177, color: "schwarz", style: "durchgehend", width: "fein" },
-  { id: "h3", x1: 2500, y1: 2.75, x2: 2450, y2: 4.762521786, color: "schwarz", style: "durchgehend", width: "fein" },
-  { id: "h4", x1: 2500, y1: 1.8, x2: 2430, y2: 4.369432715, color: "schwarz", style: "durchgehend", width: "fein" },
-  { id: "h5", x1: 2500, y1: 0.85, x2: 2425, y2: 3.810599876, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "l1", title: "-30°C", showTitle: true, x1: 1900, y1: 14.0, x2: 2500, y2: 7.25, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l2", title: "-20°C", showTitle: true, x1: 1929, y1: 13.02, x2: 2500, y2: 6.64, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l3", title: "-10°C", showTitle: true, x1: 1957, y1: 12.08, x2: 2500, y2: 6.04, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l4", title: "0°C", showTitle: true, x1: 1986, y1: 11.1, x2: 2500, y2: 5.43, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l5", title: "10°C", showTitle: true, x1: 2013, y1: 10.19, x2: 2500, y2: 4.82, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l6", title: "20°C", showTitle: true, x1: 2041, y1: 9.24, x2: 2500, y2: 4.22, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l7", title: "30°C", showTitle: true, x1: 2069, y1: 8.3, x2: 2500, y2: 3.61, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l8", title: "40°C", showTitle: true, x1: 2097, y1: 7.35, x2: 2500, y2: 3.0, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "h1", title: "0° helper", showTitle: false, x1: 2500, y1: 4.9, x2: 2490, y2: 5.54, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "h2", title: "10° helper", showTitle: false, x1: 2500, y1: 3.95, x2: 2475, y2: 5.097372177, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "h3", title: "20° helper", showTitle: false, x1: 2500, y1: 2.75, x2: 2450, y2: 4.762521786, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "h4", title: "30° helper", showTitle: false, x1: 2500, y1: 1.8, x2: 2430, y2: 4.369432715, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "h5", title: "40° helper", showTitle: false, x1: 2500, y1: 0.85, x2: 2425, y2: 3.810599876, color: "schwarz", style: "durchgehend", width: "fein" },
 ];
 
 function numberValue(value: string): number {

@@ -78,6 +78,8 @@ export interface EnvelopePoint {
 
 export interface HOGELineConfig {
   id: string;
+  title: string;
+  showTitle: boolean;
   x1: number;
   y1: number;
   x2: number;
