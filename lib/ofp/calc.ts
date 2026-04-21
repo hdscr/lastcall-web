@@ -221,7 +221,7 @@ function evaluatePayload(plan: FlightPlan, config: OFPConfig, deltaIsa: number) 
   const inLongRange = CG_long >= env.longMin && CG_long <= env.longMax;
   const inLatRange = CG_lat >= env.latMin && CG_lat <= env.latMax;
   const inLongPolygon = pointInPolygon({ x: CG_long, y: TOM_lbs }, env.longitudinalPoints);
-  const inLatPolygon = pointInPolygon({ x: CG_lat, y: TOM_lbs }, env.lateralPoints);
+  const inLatPolygon = pointInPolygon({ x: CG_long, y: CG_lat }, env.lateralPoints);
   const inEnvelope = inLongRange && inLatRange && inLongPolygon && inLatPolygon;
 
   return { TOM_lbs, CG_long, CG_lat, HOGE_ft, inEnvelope };
@@ -306,3 +306,4 @@ export function evaluateFlightPlan(plan: FlightPlan, config: OFPConfig): Evaluat
     warnings,
   };
 }
+

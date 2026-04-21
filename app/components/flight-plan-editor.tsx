@@ -258,12 +258,14 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
           <CGEnvelopeTable
             title="Longitudinal Envelope Points"
             xLabel="CG long (in)"
+            yLabel="Weight (lbs)"
             points={longEnvelope}
             onChange={setLongEnvelope}
           />
           <CGEnvelopeTable
             title="Lateral Envelope Points"
-            xLabel="CG lat (in)"
+            xLabel="CG long (in)"
+            yLabel="CG lat (in)"
             points={latEnvelope}
             onChange={setLatEnvelope}
           />

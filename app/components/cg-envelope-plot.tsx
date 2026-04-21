@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { EnvelopePoint } from "@/lib/ofp/types";
 
@@ -38,13 +38,7 @@ function polygon(points: EnvelopePoint[], width: number, height: number) {
     .join(" ");
 }
 
-function marker(
-  x: number,
-  y: number,
-  points: EnvelopePoint[],
-  width: number,
-  height: number,
-) {
+function marker(x: number, y: number, points: EnvelopePoint[], width: number, height: number) {
   const b = bounds(points);
   const pad = 16;
   return {
@@ -56,6 +50,7 @@ function marker(
 function Plot({
   title,
   xLabel,
+  yLabel,
   points,
   currentX,
   currentY,
@@ -63,6 +58,7 @@ function Plot({
 }: {
   title: string;
   xLabel: string;
+  yLabel: string;
   points: EnvelopePoint[];
   currentX: number;
   currentY: number;
@@ -87,7 +83,7 @@ function Plot({
         <circle cx={p.cx} cy={p.cy} r="5" fill={inEnvelope ? "#16a34a" : "#dc2626"} />
       </svg>
       <p className="mt-1 text-xs text-zinc-600">
-        {xLabel}: {currentX.toFixed(2)} | TOM: {currentY.toFixed(1)} lbs
+        {xLabel}: {currentX.toFixed(2)} | {yLabel}: {currentY.toFixed(2)}
       </p>
     </div>
   );
@@ -105,7 +101,8 @@ export function CGEnvelopePlot({
     <div className="grid gap-3 md:grid-cols-2">
       <Plot
         title="Longitudinal Envelope Plot"
-        xLabel="CG long"
+        xLabel="CG long (in)"
+        yLabel="Weight (lbs)"
         points={longPoints}
         currentX={currentLong}
         currentY={tomLbs}
@@ -113,13 +110,13 @@ export function CGEnvelopePlot({
       />
       <Plot
         title="Lateral Envelope Plot"
-        xLabel="CG lat"
+        xLabel="CG long (in)"
+        yLabel="CG lat (in)"
         points={latPoints}
-        currentX={currentLat}
-        currentY={tomLbs}
+        currentX={currentLong}
+        currentY={currentLat}
         inEnvelope={inEnvelope}
       />
     </div>
   );
 }
-
