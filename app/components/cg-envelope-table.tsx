@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { EnvelopePoint } from "@/lib/ofp/types";
 
@@ -6,6 +6,7 @@ type Props = {
   title: string;
   points: EnvelopePoint[];
   xLabel: string;
+  yLabel: string;
   onChange: (next: EnvelopePoint[]) => void;
 };
 
@@ -14,7 +15,7 @@ function n(v: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function CGEnvelopeTable({ title, points, xLabel, onChange }: Props) {
+export function CGEnvelopeTable({ title, points, xLabel, yLabel, onChange }: Props) {
   return (
     <div className="rounded border bg-white p-2">
       <div className="mb-2 flex items-center justify-between">
@@ -32,7 +33,7 @@ export function CGEnvelopeTable({ title, points, xLabel, onChange }: Props) {
           <tr className="bg-zinc-100">
             <th className="border p-1 text-left">#</th>
             <th className="border p-1 text-left">{xLabel}</th>
-            <th className="border p-1 text-left">Weight (lbs)</th>
+            <th className="border p-1 text-left">{yLabel}</th>
             <th className="border p-1 text-left">-</th>
           </tr>
         </thead>

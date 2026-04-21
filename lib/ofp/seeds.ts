@@ -62,12 +62,14 @@ export const defaultConfig: OFPConfig = {
         { x: 106.0, y: 1500 },
       ],
       lateralPoints: [
-        { x: -12, y: 1500 },
-        { x: -11, y: 2200 },
-        { x: -9, y: 2500 },
-        { x: 9, y: 2500 },
-        { x: 11, y: 2200 },
-        { x: 12, y: 1500 },
+        // Approximate default shape for long-vs-lat envelope.
+        { x: 91.0, y: 0.0 },
+        { x: 93.0, y: 3.5 },
+        { x: 99.0, y: 4.0 },
+        { x: 103.0, y: 2.0 },
+        { x: 103.0, y: -2.0 },
+        { x: 99.0, y: -4.0 },
+        { x: 93.0, y: -3.5 },
       ],
     },
   },
@@ -151,4 +153,5 @@ export const defaultPlan: FlightPlan = {
     },
   ],
 };
+
 
