@@ -7,6 +7,10 @@ type Props = {
   points: EnvelopePoint[];
   xLabel: string;
   yLabel: string;
+  xMin?: number;
+  xMax?: number;
+  yMin?: number;
+  yMax?: number;
   onChange: (next: EnvelopePoint[]) => void;
 };
 
@@ -15,7 +19,17 @@ function n(v: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function CGEnvelopeTable({ title, points, xLabel, yLabel, onChange }: Props) {
+export function CGEnvelopeTable({
+  title,
+  points,
+  xLabel,
+  yLabel,
+  xMin,
+  xMax,
+  yMin,
+  yMax,
+  onChange,
+}: Props) {
   return (
     <div className="rounded border bg-white p-2">
       <div className="mb-2 flex items-center justify-between">
@@ -46,6 +60,8 @@ export function CGEnvelopeTable({ title, points, xLabel, yLabel, onChange }: Pro
                   className="w-full rounded border px-1 py-0.5"
                   type="number"
                   step="0.01"
+                  min={xMin}
+                  max={xMax}
                   value={p.x}
                   onChange={(e) =>
                     onChange(points.map((row, j) => (j === i ? { ...row, x: n(e.target.value) } : row)))
@@ -57,6 +73,8 @@ export function CGEnvelopeTable({ title, points, xLabel, yLabel, onChange }: Pro
                   className="w-full rounded border px-1 py-0.5"
                   type="number"
                   step="0.1"
+                  min={yMin}
+                  max={yMax}
                   value={p.y}
                   onChange={(e) =>
                     onChange(points.map((row, j) => (j === i ? { ...row, y: n(e.target.value) } : row)))

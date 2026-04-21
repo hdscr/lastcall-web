@@ -49,8 +49,8 @@ export const defaultConfig: OFPConfig = {
     cgEnvelope: {
       longMin: 96,
       longMax: 110,
-      latMin: -10,
-      latMax: 10,
+      latMin: -3,
+      latMax: 3,
       // Approximate default shape; replace with exact R44 POH points when available.
       longitudinalPoints: [
         { x: 95.5, y: 1500 },
@@ -64,12 +64,12 @@ export const defaultConfig: OFPConfig = {
       lateralPoints: [
         // Approximate default shape for long-vs-lat envelope.
         { x: 91.0, y: 0.0 },
-        { x: 93.0, y: 3.5 },
-        { x: 99.0, y: 4.0 },
+        { x: 93.0, y: 2.8 },
+        { x: 99.0, y: 3.0 },
         { x: 103.0, y: 2.0 },
         { x: 103.0, y: -2.0 },
-        { x: 99.0, y: -4.0 },
-        { x: 93.0, y: -3.5 },
+        { x: 99.0, y: -3.0 },
+        { x: 93.0, y: -2.8 },
       ],
     },
   },
