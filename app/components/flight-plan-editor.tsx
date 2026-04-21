@@ -259,6 +259,8 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
             title="Longitudinal Envelope Points"
             xLabel="CG long (in)"
             yLabel="Weight (lbs)"
+            xMin={config.weightConfig.cgEnvelope.longMin}
+            xMax={config.weightConfig.cgEnvelope.longMax}
             points={longEnvelope}
             onChange={setLongEnvelope}
           />
@@ -266,6 +268,10 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
             title="Lateral Envelope Points"
             xLabel="CG long (in)"
             yLabel="CG lat (in)"
+            xMin={config.weightConfig.cgEnvelope.longMin}
+            xMax={config.weightConfig.cgEnvelope.longMax}
+            yMin={config.weightConfig.cgEnvelope.latMin}
+            yMax={config.weightConfig.cgEnvelope.latMax}
             points={latEnvelope}
             onChange={setLatEnvelope}
           />
