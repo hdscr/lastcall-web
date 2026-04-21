@@ -71,6 +71,13 @@ export interface VoiceScript {
   callText: string;
 }
 
+export interface AircraftProfile {
+  registration: string;
+  emptyMass_lbs: number;
+  longCg_in: number;
+  mtw_lbs: number;
+}
+
 export interface EnvelopePoint {
   x: number;
   y: number;

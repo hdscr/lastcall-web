@@ -1,8 +1,8 @@
 ﻿"use client";
 
 import { evaluateFlightPlan, toHHMM } from "@/lib/ofp/calc";
-import { defaultConfig, defaultPlan } from "@/lib/ofp/seeds";
-import type { EnvelopePoint, FlightPlan, HOGELineConfig, LegInput, LegType } from "@/lib/ofp/types";
+import { defaultAircraftProfiles, defaultConfig, defaultPlan } from "@/lib/ofp/seeds";
+import type { AircraftProfile, EnvelopePoint, FlightPlan, HOGELineConfig, LegInput, LegType } from "@/lib/ofp/types";
 import { CGEnvelopePlot } from "./cg-envelope-plot";
 import { CGEnvelopeTable } from "./cg-envelope-table";
 import { HOGEChart } from "./hoge-chart";
@@ -24,6 +24,7 @@ export type PlanListItem = {
 const LONG_ENV_KEY = "ofp_cg_long_envelope";
 const LAT_ENV_KEY = "ofp_cg_lat_envelope";
 const HOGE_LINES_KEY = "ofp_hoge_lines";
+const AIRCRAFT_PROFILES_KEY = "ofp_admin_aircraft_profiles";
 
 const defaultHogeLines: HOGELineConfig[] = [
   { id: "l1", title: "-30°C", showTitle: true, x1: 1900, y1: 14.0, x2: 2500, y2: 7.25, color: "schwarz", style: "durchgehend", width: "mittel" },
@@ -102,20 +103,41 @@ function initialHogeLines(): HOGELineConfig[] {
   }
 }
 
+function initialAircraftProfiles(): AircraftProfile[] {
+  if (typeof window === "undefined") return defaultAircraftProfiles;
+  const raw = localStorage.getItem(AIRCRAFT_PROFILES_KEY);
+  if (!raw) return defaultAircraftProfiles;
+  try {
+    const parsed = JSON.parse(raw) as AircraftProfile[];
+    return parsed.length > 0 ? parsed : defaultAircraftProfiles;
+  } catch {
+    return defaultAircraftProfiles;
+  }
+}
+
 export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: PlanListItem[] }) {
   const [plan, setPlan] = useState<FlightPlan>(() => initialPlan());
   const [longEnvelope, setLongEnvelope] = useState<EnvelopePoint[]>(() => initialLongEnvelope());
   const [latEnvelope, setLatEnvelope] = useState<EnvelopePoint[]>(() => initialLatEnvelope());
   const [hogeLines, setHogeLines] = useState<HOGELineConfig[]>(() => initialHogeLines());
+  const [aircraftProfiles, setAircraftProfiles] = useState<AircraftProfile[]>(() => initialAircraftProfiles());
   const [savedPlans, setSavedPlans] = useState<PlanListItem[]>(initialSavedPlans);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");
+
+  const selectedAircraftProfile = useMemo(
+    () => aircraftProfiles.find((profile) => profile.registration === plan.registration),
+    [aircraftProfiles, plan.registration],
+  );
 
   const config = useMemo(
     () => ({
       ...defaultConfig,
       weightConfig: {
         ...defaultConfig.weightConfig,
+        emptyWeight_lbs: selectedAircraftProfile?.emptyMass_lbs ?? defaultConfig.weightConfig.emptyWeight_lbs,
+        emptyLongArm_in: selectedAircraftProfile?.longCg_in ?? defaultConfig.weightConfig.emptyLongArm_in,
+        maxTakeoffWeight_lbs: selectedAircraftProfile?.mtw_lbs ?? defaultConfig.weightConfig.maxTakeoffWeight_lbs,
         cgEnvelope: {
           ...defaultConfig.weightConfig.cgEnvelope,
           longitudinalPoints: longEnvelope,
@@ -123,7 +145,7 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
         },
       },
     }),
-    [longEnvelope, latEnvelope],
+    [longEnvelope, latEnvelope, selectedAircraftProfile],
   );
 
   const evaluated = useMemo(() => evaluateFlightPlan(plan, config), [plan, config]);
@@ -140,6 +162,15 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
   useEffect(() => {
     localStorage.setItem(HOGE_LINES_KEY, JSON.stringify(hogeLines));
   }, [hogeLines]);
+  useEffect(() => {
+    function onStorage(event: StorageEvent) {
+      if (event.key === AIRCRAFT_PROFILES_KEY) {
+        setAircraftProfiles(initialAircraftProfiles());
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   async function refreshList() {
     const res = await fetch("/api/flight-plans", { cache: "no-store" });
@@ -241,7 +272,20 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
         </label>
         <label className="flex flex-col gap-1">
           Registration
-          <input value={plan.registration} onChange={(e) => setPlan({ ...plan, registration: e.target.value })} className="rounded border px-2 py-1" />
+          <select
+            value={plan.registration}
+            onChange={(e) => setPlan({ ...plan, registration: e.target.value })}
+            className="rounded border px-2 py-1"
+          >
+            {aircraftProfiles.map((profile) => (
+              <option key={profile.registration} value={profile.registration}>
+                {profile.registration}
+              </option>
+            ))}
+            {!selectedAircraftProfile && plan.registration ? (
+              <option value={plan.registration}>{plan.registration} (custom)</option>
+            ) : null}
+          </select>
         </label>
         <label className="flex flex-col gap-1">
           Date
@@ -275,6 +319,13 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
 
       <section className="grid gap-3 rounded border p-3 md:grid-cols-4">
         <h2 className="text-lg font-medium md:col-span-4">Payload / CG / HOGE</h2>
+        <div className="rounded bg-zinc-100 p-2 md:col-span-4">
+          Aircraft Profile:{" "}
+          <strong>
+            Empty {config.weightConfig.emptyWeight_lbs} lbs | Long CG {config.weightConfig.emptyLongArm_in} in | MTW{" "}
+            {config.weightConfig.maxTakeoffWeight_lbs} lbs
+          </strong>
+        </div>
         {([
           ["pax_rightFront_kg", "PAX RF kg"],
           ["pax_leftFront_kg", "PAX LF kg"],
