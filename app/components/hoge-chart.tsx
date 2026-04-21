@@ -36,6 +36,19 @@ const TEMP_LINES: TempLine[] = [
   { label: "40°C", x1: 2097, y1: 7.35, x2: 2500, y2: 3.0 },
 ];
 
+const HELPER_LINES: Array<{
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}> = [
+  { x1: 1986, y1: 11.1, x2: 2490, y2: 5.54 }, // 0 degrees helper
+  { x1: 2013, y1: 10.19, x2: 2475, y2: 5.1 }, // 10 degrees helper
+  { x1: 2041, y1: 9.24, x2: 2450, y2: 4.76 }, // 20 degrees helper
+  { x1: 2069, y1: 8.3, x2: 2430, y2: 4.37 }, // 30 degrees helper
+  { x1: 2097, y1: 7.35, x2: 2425, y2: 3.81 }, // 40 degrees helper
+];
+
 function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v));
 }
@@ -136,6 +149,24 @@ export function HOGEChart({
                 {line.label}
               </text>
             </g>
+          );
+        })}
+
+        {HELPER_LINES.map((line, idx) => {
+          const x1 = xToSvg(line.x1, width, left, right);
+          const y1 = yToSvg(line.y1, height, top, bottom);
+          const x2 = xToSvg(line.x2, width, left, right);
+          const y2 = yToSvg(line.y2, height, top, bottom);
+          return (
+            <line
+              key={`helper-${idx}`}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke="#111827"
+              strokeWidth="1.4"
+            />
           );
         })}
 
