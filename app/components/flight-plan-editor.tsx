@@ -2,10 +2,11 @@
 
 import { evaluateFlightPlan, toHHMM } from "@/lib/ofp/calc";
 import { defaultConfig, defaultPlan } from "@/lib/ofp/seeds";
-import type { EnvelopePoint, FlightPlan, LegInput, LegType } from "@/lib/ofp/types";
+import type { EnvelopePoint, FlightPlan, HOGELineConfig, LegInput, LegType } from "@/lib/ofp/types";
 import { CGEnvelopePlot } from "./cg-envelope-plot";
 import { CGEnvelopeTable } from "./cg-envelope-table";
 import { HOGEChart } from "./hoge-chart";
+import { HOGELineEditor } from "./hoge-line-editor";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -22,6 +23,23 @@ export type PlanListItem = {
 
 const LONG_ENV_KEY = "ofp_cg_long_envelope";
 const LAT_ENV_KEY = "ofp_cg_lat_envelope";
+const HOGE_LINES_KEY = "ofp_hoge_lines";
+
+const defaultHogeLines: HOGELineConfig[] = [
+  { id: "l1", x1: 1900, y1: 14.0, x2: 2500, y2: 7.25, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l2", x1: 1929, y1: 13.02, x2: 2500, y2: 6.64, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l3", x1: 1957, y1: 12.08, x2: 2500, y2: 6.04, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l4", x1: 1986, y1: 11.1, x2: 2500, y2: 5.43, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l5", x1: 2013, y1: 10.19, x2: 2500, y2: 4.82, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l6", x1: 2041, y1: 9.24, x2: 2500, y2: 4.22, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l7", x1: 2069, y1: 8.3, x2: 2500, y2: 3.61, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "l8", x1: 2097, y1: 7.35, x2: 2500, y2: 3.0, color: "schwarz", style: "durchgehend", width: "mittel" },
+  { id: "h1", x1: 2500, y1: 4.9, x2: 2490, y2: 5.54, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "h2", x1: 2500, y1: 3.95, x2: 2475, y2: 5.097372177, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "h3", x1: 2500, y1: 2.75, x2: 2450, y2: 4.762521786, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "h4", x1: 2500, y1: 1.8, x2: 2430, y2: 4.369432715, color: "schwarz", style: "durchgehend", width: "fein" },
+  { id: "h5", x1: 2500, y1: 0.85, x2: 2425, y2: 3.810599876, color: "schwarz", style: "durchgehend", width: "fein" },
+];
 
 function numberValue(value: string): number {
   const parsed = Number(value);
@@ -73,10 +91,22 @@ function initialLatEnvelope(): EnvelopePoint[] {
   }
 }
 
+function initialHogeLines(): HOGELineConfig[] {
+  if (typeof window === "undefined") return defaultHogeLines;
+  const raw = localStorage.getItem(HOGE_LINES_KEY);
+  if (!raw) return defaultHogeLines;
+  try {
+    return JSON.parse(raw) as HOGELineConfig[];
+  } catch {
+    return defaultHogeLines;
+  }
+}
+
 export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: PlanListItem[] }) {
   const [plan, setPlan] = useState<FlightPlan>(() => initialPlan());
   const [longEnvelope, setLongEnvelope] = useState<EnvelopePoint[]>(() => initialLongEnvelope());
   const [latEnvelope, setLatEnvelope] = useState<EnvelopePoint[]>(() => initialLatEnvelope());
+  const [hogeLines, setHogeLines] = useState<HOGELineConfig[]>(() => initialHogeLines());
   const [savedPlans, setSavedPlans] = useState<PlanListItem[]>(initialSavedPlans);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");
@@ -107,6 +137,9 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
   useEffect(() => {
     localStorage.setItem(LAT_ENV_KEY, JSON.stringify(latEnvelope));
   }, [latEnvelope]);
+  useEffect(() => {
+    localStorage.setItem(HOGE_LINES_KEY, JSON.stringify(hogeLines));
+  }, [hogeLines]);
 
   async function refreshList() {
     const res = await fetch("/api/flight-plans", { cache: "no-store" });
@@ -296,12 +329,8 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
             inEnvelope={evaluated.payloadOutputs.inEnvelope}
           />
         </div>
-        <HOGEChart
-          grossWeightLbs={evaluated.payloadOutputs.TOM_lbs}
-          pressureAltitudeFt={evaluated.payloadOutputs.pressureAltitude_ft}
-          densityAltitudeFt={evaluated.payloadOutputs.densityAltitude_ft}
-          hogeScenariosFt={evaluated.payloadOutputs.hogeScenarios_ft}
-        />
+        <HOGEChart lines={hogeLines} />
+        <HOGELineEditor lines={hogeLines} onChange={setHogeLines} />
       </section>
 
       <section className="grid gap-3 rounded border p-3 md:grid-cols-4">
