@@ -2,7 +2,8 @@
 
 import { evaluateFlightPlan, toHHMM } from "@/lib/ofp/calc";
 import { defaultConfig, defaultPlan } from "@/lib/ofp/seeds";
-import type { FlightPlan, LegInput, LegType } from "@/lib/ofp/types";
+import type { EnvelopePoint, FlightPlan, LegInput, LegType } from "@/lib/ofp/types";
+import { CGEnvelopeTable } from "./cg-envelope-table";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -16,6 +17,9 @@ export type PlanListItem = {
   pilots: string;
   created_at: string;
 };
+
+const LONG_ENV_KEY = "ofp_cg_long_envelope";
+const LAT_ENV_KEY = "ofp_cg_lat_envelope";
 
 function numberValue(value: string): number {
   const parsed = Number(value);
@@ -37,17 +41,62 @@ function initialPlan(): FlightPlan {
   }
 }
 
+function initialLongEnvelope(): EnvelopePoint[] {
+  if (typeof window === "undefined") return defaultConfig.weightConfig.cgEnvelope.longitudinalPoints;
+  const raw = localStorage.getItem(LONG_ENV_KEY);
+  if (!raw) return defaultConfig.weightConfig.cgEnvelope.longitudinalPoints;
+  try {
+    return JSON.parse(raw) as EnvelopePoint[];
+  } catch {
+    return defaultConfig.weightConfig.cgEnvelope.longitudinalPoints;
+  }
+}
+
+function initialLatEnvelope(): EnvelopePoint[] {
+  if (typeof window === "undefined") return defaultConfig.weightConfig.cgEnvelope.lateralPoints;
+  const raw = localStorage.getItem(LAT_ENV_KEY);
+  if (!raw) return defaultConfig.weightConfig.cgEnvelope.lateralPoints;
+  try {
+    return JSON.parse(raw) as EnvelopePoint[];
+  } catch {
+    return defaultConfig.weightConfig.cgEnvelope.lateralPoints;
+  }
+}
+
 export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: PlanListItem[] }) {
   const [plan, setPlan] = useState<FlightPlan>(() => initialPlan());
+  const [longEnvelope, setLongEnvelope] = useState<EnvelopePoint[]>(() => initialLongEnvelope());
+  const [latEnvelope, setLatEnvelope] = useState<EnvelopePoint[]>(() => initialLatEnvelope());
   const [savedPlans, setSavedPlans] = useState<PlanListItem[]>(initialSavedPlans);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");
 
-  const evaluated = useMemo(() => evaluateFlightPlan(plan, defaultConfig), [plan]);
+  const config = useMemo(
+    () => ({
+      ...defaultConfig,
+      weightConfig: {
+        ...defaultConfig.weightConfig,
+        cgEnvelope: {
+          ...defaultConfig.weightConfig.cgEnvelope,
+          longitudinalPoints: longEnvelope,
+          lateralPoints: latEnvelope,
+        },
+      },
+    }),
+    [longEnvelope, latEnvelope],
+  );
+
+  const evaluated = useMemo(() => evaluateFlightPlan(plan, config), [plan, config]);
 
   useEffect(() => {
     localStorage.setItem("ofp_current_plan", JSON.stringify(plan));
   }, [plan]);
+  useEffect(() => {
+    localStorage.setItem(LONG_ENV_KEY, JSON.stringify(longEnvelope));
+  }, [longEnvelope]);
+  useEffect(() => {
+    localStorage.setItem(LAT_ENV_KEY, JSON.stringify(latEnvelope));
+  }, [latEnvelope]);
 
   async function refreshList() {
     const res = await fetch("/api/flight-plans", { cache: "no-store" });
@@ -198,6 +247,26 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
         <div className="rounded bg-zinc-100 p-2">CG long: <strong>{evaluated.payloadOutputs.CG_long}</strong></div>
         <div className="rounded bg-zinc-100 p-2">CG lat: <strong>{evaluated.payloadOutputs.CG_lat}</strong></div>
         <div className="rounded bg-zinc-100 p-2">HOGE: <strong>{evaluated.payloadOutputs.HOGE_ft} ft</strong></div>
+        <div className="rounded bg-zinc-100 p-2">
+          Envelope:{" "}
+          <strong className={evaluated.payloadOutputs.inEnvelope ? "text-green-700" : "text-red-700"}>
+            {evaluated.payloadOutputs.inEnvelope ? "IN" : "OUT"}
+          </strong>
+        </div>
+        <div className="grid gap-3 md:col-span-4 md:grid-cols-2">
+          <CGEnvelopeTable
+            title="Longitudinal Envelope Points"
+            xLabel="CG long (in)"
+            points={longEnvelope}
+            onChange={setLongEnvelope}
+          />
+          <CGEnvelopeTable
+            title="Lateral Envelope Points"
+            xLabel="CG lat (in)"
+            points={latEnvelope}
+            onChange={setLatEnvelope}
+          />
+        </div>
       </section>
 
       <section className="grid gap-3 rounded border p-3 md:grid-cols-4">

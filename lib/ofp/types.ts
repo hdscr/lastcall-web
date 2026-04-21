@@ -70,6 +70,11 @@ export interface VoiceScript {
   callText: string;
 }
 
+export interface EnvelopePoint {
+  x: number;
+  y: number;
+}
+
 export interface WeightConfig {
   emptyWeight_lbs: number;
   maxTakeoffWeight_lbs: number;
@@ -88,6 +93,8 @@ export interface WeightConfig {
     longMax: number;
     latMin: number;
     latMax: number;
+    longitudinalPoints: EnvelopePoint[];
+    lateralPoints: EnvelopePoint[];
   };
 }
 

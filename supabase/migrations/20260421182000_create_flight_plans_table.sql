@@ -1,4 +1,4 @@
-﻿create table if not exists public.flight_plans (
+create table if not exists public.flight_plans (
   id uuid primary key default gen_random_uuid(),
   aircraft_type text not null,
   registration text not null,
@@ -45,4 +45,3 @@ create trigger trg_set_flight_plans_updated_at
 before update on public.flight_plans
 for each row
 execute procedure public.set_flight_plans_updated_at();
-

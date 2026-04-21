@@ -1,8 +1,8 @@
--- Add panflöte to instruments (idempotent)
+-- Add panfloete to instruments (idempotent, UTF-8 safe)
 insert into public.instruments (name)
-select 'panflöte'
+select 'panfl' || chr(246) || 'te'
 where not exists (
   select 1
   from public.instruments
-  where name = 'panflöte'
+  where name = 'panfl' || chr(246) || 'te'
 );

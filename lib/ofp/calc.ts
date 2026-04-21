@@ -1,4 +1,5 @@
 ﻿import type {
+  EnvelopePoint,
   EvaluatedLeg,
   EvaluatedPlan,
   FlightPlan,
@@ -96,6 +97,22 @@ function bilinearNumeric(
   const vLow = v11 + (v21 - v11) * tx;
   const vHigh = v12 + (v22 - v12) * tx;
   return vLow + (vHigh - vLow) * ty;
+}
+
+function pointInPolygon(point: EnvelopePoint, polygon: EnvelopePoint[]): boolean {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x;
+    const yi = polygon[i].y;
+    const xj = polygon[j].x;
+    const yj = polygon[j].y;
+
+    const intersect =
+      yi > point.y !== yj > point.y &&
+      point.x < ((xj - xi) * (point.y - yi)) / (yj - yi + Number.EPSILON) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
 }
 
 export function interpolateMCP(table: PerformanceTable<MCPValue>, pa: number, oat: number): MCPValue {
@@ -201,8 +218,11 @@ function evaluatePayload(plan: FlightPlan, config: OFPConfig, deltaIsa: number) 
   const HOGE_ft = Math.max(0, Math.round(9000 - tempPenalty - massPenalty + pressureCorrection));
 
   const env = wc.cgEnvelope;
-  const inEnvelope =
-    CG_long >= env.longMin && CG_long <= env.longMax && CG_lat >= env.latMin && CG_lat <= env.latMax;
+  const inLongRange = CG_long >= env.longMin && CG_long <= env.longMax;
+  const inLatRange = CG_lat >= env.latMin && CG_lat <= env.latMax;
+  const inLongPolygon = pointInPolygon({ x: CG_long, y: TOM_lbs }, env.longitudinalPoints);
+  const inLatPolygon = pointInPolygon({ x: CG_lat, y: TOM_lbs }, env.lateralPoints);
+  const inEnvelope = inLongRange && inLatRange && inLongPolygon && inLatPolygon;
 
   return { TOM_lbs, CG_long, CG_lat, HOGE_ft, inEnvelope };
 }
@@ -286,4 +306,3 @@ export function evaluateFlightPlan(plan: FlightPlan, config: OFPConfig): Evaluat
     warnings,
   };
 }
-
