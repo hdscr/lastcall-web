@@ -22,6 +22,8 @@ export function HOGELineEditor({ lines, onChange }: Props) {
       ...lines,
       {
         id: crypto.randomUUID(),
+        title: "Neue Linie",
+        showTitle: false,
         x1: 2500,
         y1: 5,
         x2: 2400,
@@ -49,6 +51,8 @@ export function HOGELineEditor({ lines, onChange }: Props) {
         <table className="w-full min-w-[980px] border-collapse text-xs">
           <thead>
             <tr className="bg-zinc-100">
+              <th className="border p-1">Titel</th>
+              <th className="border p-1">Titel anzeigen</th>
               <th className="border p-1">x1</th>
               <th className="border p-1">y1</th>
               <th className="border p-1">x2</th>
@@ -62,6 +66,24 @@ export function HOGELineEditor({ lines, onChange }: Props) {
           <tbody>
             {lines.map((line) => (
               <tr key={line.id}>
+                <td className="border p-1">
+                  <input
+                    className="w-28 rounded border px-1"
+                    type="text"
+                    value={line.title}
+                    onChange={(e) => patchLine(line.id, { title: e.target.value })}
+                  />
+                </td>
+                <td className="border p-1">
+                  <select
+                    className="rounded border px-1"
+                    value={line.showTitle ? "ja" : "nein"}
+                    onChange={(e) => patchLine(line.id, { showTitle: e.target.value === "ja" })}
+                  >
+                    <option value="ja">ja</option>
+                    <option value="nein">nein</option>
+                  </select>
+                </td>
                 <td className="border p-1">
                   <input className="w-20 rounded border px-1" type="number" value={line.x1} onChange={(e) => patchLine(line.id, { x1: n(e.target.value) })} />
                 </td>
