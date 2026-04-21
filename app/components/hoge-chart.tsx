@@ -42,11 +42,11 @@ const HELPER_LINES: Array<{
   x2: number;
   y2: number;
 }> = [
-  { x1: 1986, y1: 11.1, x2: 2490, y2: 5.54 }, // 0 degrees helper
-  { x1: 2013, y1: 10.19, x2: 2475, y2: 5.1 }, // 10 degrees helper
-  { x1: 2041, y1: 9.24, x2: 2450, y2: 4.76 }, // 20 degrees helper
-  { x1: 2069, y1: 8.3, x2: 2430, y2: 4.37 }, // 30 degrees helper
-  { x1: 2097, y1: 7.35, x2: 2425, y2: 3.81 }, // 40 degrees helper
+  { x1: 1986, y1: 11.0975, x2: 2490, y2: 5.539282101 }, // 0 degrees helper
+  { x1: 2013, y1: 10.18625, x2: 2475, y2: 5.097372177 }, // 10 degrees helper
+  { x1: 2041, y1: 9.24125, x2: 2450, y2: 4.762521786 }, // 20 degrees helper
+  { x1: 2069, y1: 8.29625, x2: 2430, y2: 4.369432715 }, // 30 degrees helper
+  { x1: 2097, y1: 7.35125, x2: 2425, y2: 3.810599876 }, // 40 degrees helper
 ];
 
 function clamp(v: number, min: number, max: number): number {
