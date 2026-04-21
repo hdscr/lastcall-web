@@ -329,7 +329,7 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
             inEnvelope={evaluated.payloadOutputs.inEnvelope}
           />
         </div>
-        <HOGEChart lines={hogeLines} />
+        <HOGEChart lines={hogeLines} isaDeviationC={evaluated.deltaISADev_C} />
         <HOGELineEditor lines={hogeLines} onChange={setHogeLines} />
       </section>
 
