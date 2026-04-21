@@ -1,53 +1,15 @@
-﻿"use client";
+"use client";
+
+import type { HOGELineConfig } from "@/lib/ofp/types";
 
 type Props = {
-  grossWeightLbs: number;
-  pressureAltitudeFt: number;
-  densityAltitudeFt: number;
-  hogeScenariosFt: {
-    isa: number;
-    qnhCorrected: number;
-    deltaIsaCorrected: number;
-    final: number;
-  };
-};
-
-type TempLine = {
-  label: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  lines: HOGELineConfig[];
 };
 
 const X_MIN = 1700;
 const X_MAX = 2600;
 const Y_MIN = 0;
 const Y_MAX = 14;
-
-const TEMP_LINES: TempLine[] = [
-  { label: "-30°C", x1: 1900, y1: 14.0, x2: 2500, y2: 7.25 },
-  { label: "-20°C", x1: 1929, y1: 13.02, x2: 2500, y2: 6.64 },
-  { label: "-10°C", x1: 1957, y1: 12.08, x2: 2500, y2: 6.04 },
-  { label: "0°C", x1: 1986, y1: 11.1, x2: 2500, y2: 5.43 },
-  { label: "10°C", x1: 2013, y1: 10.19, x2: 2500, y2: 4.82 },
-  { label: "20°C", x1: 2041, y1: 9.24, x2: 2500, y2: 4.22 },
-  { label: "30°C", x1: 2069, y1: 8.3, x2: 2500, y2: 3.61 },
-  { label: "40°C", x1: 2097, y1: 7.35, x2: 2500, y2: 3.0 },
-];
-
-const HELPER_LINES: Array<{
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-}> = [
-  { x1: 2500, y1: 4.9, x2: 2490, y2: 5.54 }, // 0 degrees helper
-  { x1: 2500, y1: 3.95, x2: 2475, y2: 5.097372177 }, // 10 degrees helper
-  { x1: 2500, y1: 2.75, x2: 2450, y2: 4.762521786 }, // 20 degrees helper
-  { x1: 2500, y1: 1.8, x2: 2430, y2: 4.369432715 }, // 30 degrees helper
-  { x1: 2500, y1: 0.85, x2: 2425, y2: 3.810599876 }, // 40 degrees helper
-];
 
 function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v));
@@ -61,33 +23,29 @@ function yToSvg(y: number, height: number, top: number, bottom: number): number 
   return height - bottom - ((clamp(y, Y_MIN, Y_MAX) - Y_MIN) / (Y_MAX - Y_MIN)) * (height - top - bottom);
 }
 
-function scenarioLine(label: string, yFt: number, color: string) {
-  return { label, y: yFt / 1000, color };
+function strokeColor(color: HOGELineConfig["color"]): string {
+  if (color === "rot") return "#dc2626";
+  if (color === "blau") return "#2563eb";
+  return "#111827";
 }
 
-export function HOGEChart({
-  grossWeightLbs,
-  pressureAltitudeFt,
-  densityAltitudeFt,
-  hogeScenariosFt,
-}: Props) {
+function strokeDash(style: HOGELineConfig["style"]): string | undefined {
+  return style === "gestrichelt" ? "6 4" : undefined;
+}
+
+function strokeWidth(width: HOGELineConfig["width"]): number {
+  if (width === "grob") return 2.8;
+  if (width === "mittel") return 2;
+  return 1.2;
+}
+
+export function HOGEChart({ lines }: Props) {
   const width = 860;
   const height = 420;
   const left = 80;
   const right = 24;
   const top = 24;
   const bottom = 58;
-
-  const weightX = xToSvg(grossWeightLbs, width, left, right);
-  const pressureY = yToSvg(pressureAltitudeFt / 1000, height, top, bottom);
-  const densityY = yToSvg(densityAltitudeFt / 1000, height, top, bottom);
-
-  const scenarioLines = [
-    scenarioLine("HOGE ISA", hogeScenariosFt.isa, "#2563eb"),
-    scenarioLine("HOGE QNH", hogeScenariosFt.qnhCorrected, "#0f766e"),
-    scenarioLine("HOGE Delta ISA", hogeScenariosFt.deltaIsaCorrected, "#ca8a04"),
-    scenarioLine("HOGE Final", hogeScenariosFt.final, "#dc2626"),
-  ];
 
   return (
     <div className="rounded border bg-white p-3 md:col-span-4">
@@ -100,14 +58,7 @@ export function HOGEChart({
           const x = xToSvg(xTick, width, left, right);
           return (
             <g key={`x-${xTick}`}>
-              <line
-                x1={x}
-                y1={top}
-                x2={x}
-                y2={height - bottom}
-                stroke="#cbd5e1"
-                strokeDasharray="4 5"
-              />
+              <line x1={x} y1={top} x2={x} y2={height - bottom} stroke="#cbd5e1" strokeDasharray="4 5" />
               <text x={x} y={height - bottom + 18} fontSize="11" textAnchor="middle" fill="#334155">
                 {xTick}
               </text>
@@ -119,14 +70,7 @@ export function HOGEChart({
           const y = yToSvg(yTick, height, top, bottom);
           return (
             <g key={`y-${yTick}`}>
-              <line
-                x1={left}
-                y1={y}
-                x2={width - right}
-                y2={y}
-                stroke="#cbd5e1"
-                strokeDasharray="4 5"
-              />
+              <line x1={left} y1={y} x2={width - right} y2={y} stroke="#cbd5e1" strokeDasharray="4 5" />
               <text x={left - 10} y={y + 4} fontSize="11" textAnchor="end" fill="#334155">
                 {yTick}
               </text>
@@ -137,62 +81,18 @@ export function HOGEChart({
         <line x1={left} y1={top} x2={left} y2={height - bottom} stroke="#0f172a" strokeWidth="1.5" />
         <line x1={left} y1={height - bottom} x2={width - right} y2={height - bottom} stroke="#0f172a" strokeWidth="1.5" />
 
-        {TEMP_LINES.map((line) => {
-          const x1 = xToSvg(line.x1, width, left, right);
-          const y1 = yToSvg(line.y1, height, top, bottom);
-          const x2 = xToSvg(line.x2, width, left, right);
-          const y2 = yToSvg(line.y2, height, top, bottom);
-          return (
-            <g key={line.label}>
-              <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#111827" strokeWidth="2" />
-              <text x={x1 + 6} y={y1 - 6} fontSize="11" fill="#111827">
-                {line.label}
-              </text>
-            </g>
-          );
-        })}
-
-        {HELPER_LINES.map((line, idx) => {
-          const x1 = xToSvg(line.x1, width, left, right);
-          const y1 = yToSvg(line.y1, height, top, bottom);
-          const x2 = xToSvg(line.x2, width, left, right);
-          const y2 = yToSvg(line.y2, height, top, bottom);
-          return (
-            <line
-              key={`helper-${idx}`}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#111827"
-              strokeWidth="1.4"
-            />
-          );
-        })}
-
-        {scenarioLines.map((s) => {
-          const y = yToSvg(s.y, height, top, bottom);
-          return (
-            <g key={s.label}>
-              <line
-                x1={left}
-                y1={y}
-                x2={width - right}
-                y2={y}
-                stroke={s.color}
-                strokeWidth="1.4"
-                strokeDasharray="6 4"
-              />
-              <text x={width - right - 2} y={y - 4} fontSize="10" textAnchor="end" fill={s.color}>
-                {s.label}
-              </text>
-            </g>
-          );
-        })}
-
-        <line x1={weightX} y1={top} x2={weightX} y2={height - bottom} stroke="#334155" strokeDasharray="3 3" />
-        <circle cx={weightX} cy={pressureY} r="4" fill="#111827" />
-        <circle cx={weightX} cy={densityY} r="4" fill="#7c3aed" />
+        {lines.map((line) => (
+          <line
+            key={line.id}
+            x1={xToSvg(line.x1, width, left, right)}
+            y1={yToSvg(line.y1, height, top, bottom)}
+            x2={xToSvg(line.x2, width, left, right)}
+            y2={yToSvg(line.y2, height, top, bottom)}
+            stroke={strokeColor(line.color)}
+            strokeWidth={strokeWidth(line.width)}
+            strokeDasharray={strokeDash(line.style)}
+          />
+        ))}
 
         <text
           x={(left + (width - right)) / 2}
@@ -215,12 +115,7 @@ export function HOGEChart({
           Pressure altitude - Hp x 1000ft
         </text>
       </svg>
-
-      <div className="mt-2 grid gap-1 text-xs text-zinc-700 md:grid-cols-3">
-        <div>Gross Weight: {grossWeightLbs.toFixed(1)} lb</div>
-        <div>Pressure Altitude: {(pressureAltitudeFt / 1000).toFixed(2)} (x1000 ft)</div>
-        <div>Density Altitude: {(densityAltitudeFt / 1000).toFixed(2)} (x1000 ft)</div>
-      </div>
     </div>
   );
 }
+

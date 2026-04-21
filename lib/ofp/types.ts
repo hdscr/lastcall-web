@@ -76,6 +76,17 @@ export interface EnvelopePoint {
   y: number;
 }
 
+export interface HOGELineConfig {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  color: "schwarz" | "rot" | "blau";
+  style: "durchgehend" | "gestrichelt";
+  width: "fein" | "mittel" | "grob";
+}
+
 export interface WeightConfig {
   emptyWeight_lbs: number;
   maxTakeoffWeight_lbs: number;
