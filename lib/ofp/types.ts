@@ -29,6 +29,7 @@ export interface FlightPlan {
     qnh: number;
     windDirMag: number;
     windSpeedKt: number;
+    fieldElevation_ft: number;
   };
   temperatures: {
     alt1_ft: number;
@@ -130,6 +131,14 @@ export interface EvaluatedPlan {
     CG_long: number;
     CG_lat: number;
     HOGE_ft: number;
+    pressureAltitude_ft: number;
+    densityAltitude_ft: number;
+    hogeScenarios_ft: {
+      isa: number;
+      qnhCorrected: number;
+      deltaIsaCorrected: number;
+      final: number;
+    };
     inEnvelope: boolean;
   };
   warnings: string[];

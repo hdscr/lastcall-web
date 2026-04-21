@@ -5,6 +5,7 @@ import { defaultConfig, defaultPlan } from "@/lib/ofp/seeds";
 import type { EnvelopePoint, FlightPlan, LegInput, LegType } from "@/lib/ofp/types";
 import { CGEnvelopePlot } from "./cg-envelope-plot";
 import { CGEnvelopeTable } from "./cg-envelope-table";
+import { HOGEChart } from "./hoge-chart";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -36,7 +37,15 @@ function initialPlan(): FlightPlan {
   const raw = localStorage.getItem("ofp_current_plan");
   if (!raw) return defaultPlan;
   try {
-    return JSON.parse(raw) as FlightPlan;
+    const parsed = JSON.parse(raw) as FlightPlan;
+    return {
+      ...defaultPlan,
+      ...parsed,
+      weather: {
+        ...defaultPlan.weather,
+        ...parsed.weather,
+      },
+    };
   } catch {
     return defaultPlan;
   }
@@ -224,6 +233,7 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
         <label className="flex flex-col gap-1">QNH (hPa)<input type="number" value={plan.weather.qnh} onChange={(e) => setPlan({ ...plan, weather: { ...plan.weather, qnh: numberValue(e.target.value) } })} className="rounded border px-2 py-1" /></label>
         <label className="flex flex-col gap-1">Wind Dir (mag)<input type="number" value={plan.weather.windDirMag} onChange={(e) => setPlan({ ...plan, weather: { ...plan.weather, windDirMag: numberValue(e.target.value) } })} className="rounded border px-2 py-1" /></label>
         <label className="flex flex-col gap-1">Wind kt<input type="number" value={plan.weather.windSpeedKt} onChange={(e) => setPlan({ ...plan, weather: { ...plan.weather, windSpeedKt: numberValue(e.target.value) } })} className="rounded border px-2 py-1" /></label>
+        <label className="flex flex-col gap-1">Field Elevation ft<input type="number" value={plan.weather.fieldElevation_ft} onChange={(e) => setPlan({ ...plan, weather: { ...plan.weather, fieldElevation_ft: numberValue(e.target.value) } })} className="rounded border px-2 py-1" /></label>
         <label className="flex flex-col gap-1">TAS kt<input type="number" value={plan.TAS} onChange={(e) => setPlan({ ...plan, TAS: numberValue(e.target.value) })} className="rounded border px-2 py-1" /></label>
         <label className="flex flex-col gap-1">OAT @ {plan.temperatures.alt1_ft}ft<input type="number" value={plan.temperatures.oat1_C} onChange={(e) => setPlan({ ...plan, temperatures: { ...plan.temperatures, oat1_C: numberValue(e.target.value) } })} className="rounded border px-2 py-1" /></label>
         <label className="flex flex-col gap-1">OAT @ {plan.temperatures.alt2_ft}ft<input type="number" value={plan.temperatures.oat2_C} onChange={(e) => setPlan({ ...plan, temperatures: { ...plan.temperatures, oat2_C: numberValue(e.target.value) } })} className="rounded border px-2 py-1" /></label>
@@ -286,6 +296,12 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
             inEnvelope={evaluated.payloadOutputs.inEnvelope}
           />
         </div>
+        <HOGEChart
+          grossWeightLbs={evaluated.payloadOutputs.TOM_lbs}
+          pressureAltitudeFt={evaluated.payloadOutputs.pressureAltitude_ft}
+          densityAltitudeFt={evaluated.payloadOutputs.densityAltitude_ft}
+          hogeScenariosFt={evaluated.payloadOutputs.hogeScenarios_ft}
+        />
       </section>
 
       <section className="grid gap-3 rounded border p-3 md:grid-cols-4">
