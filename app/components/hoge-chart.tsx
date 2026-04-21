@@ -5,6 +5,7 @@ import type { HOGELineConfig } from "@/lib/ofp/types";
 type Props = {
   lines: HOGELineConfig[];
   isaDeviationC: number;
+  grossWeightLbs: number;
 };
 
 const X_MIN = 1700;
@@ -103,7 +104,7 @@ function correctedIsaLine(isaDevC: number): XYLine {
   };
 }
 
-export function HOGEChart({ lines, isaDeviationC }: Props) {
+export function HOGEChart({ lines, isaDeviationC, grossWeightLbs }: Props) {
   const width = 860;
   const height = 420;
   const left = 80;
@@ -111,6 +112,9 @@ export function HOGEChart({ lines, isaDeviationC }: Props) {
   const top = 24;
   const bottom = 58;
   const isaCorr = correctedIsaLine(isaDeviationC);
+  const yIsaAtWeight = yAtX(isaCorr, grossWeightLbs);
+  const xWeight = xToSvg(grossWeightLbs, width, left, right);
+  const yIsaSvg = yToSvg(yIsaAtWeight, height, top, bottom);
 
   return (
     <div className="rounded border bg-white p-3 md:col-span-4">
@@ -176,18 +180,40 @@ export function HOGEChart({ lines, isaDeviationC }: Props) {
             y1={yToSvg(isaCorr.y1, height, top, bottom)}
             x2={xToSvg(isaCorr.x2, width, left, right)}
             y2={yToSvg(isaCorr.y2, height, top, bottom)}
-            stroke="#dc2626"
+            stroke="#2563eb"
             strokeWidth="2.4"
           />
           <text
             x={xToSvg(isaCorr.x1, width, left, right) + 8}
             y={yToSvg(isaCorr.y1, height, top, bottom) - 8}
             fontSize="11"
-            fill="#dc2626"
+            fill="#2563eb"
           >
             ISA Temperatur Korrigiert ({isaDeviationC.toFixed(1)}°C)
           </text>
         </g>
+
+        <line
+          x1={xWeight}
+          y1={height - bottom}
+          x2={xWeight}
+          y2={yIsaSvg}
+          stroke="#374151"
+          strokeWidth="2.8"
+          strokeDasharray="8 5"
+        />
+        <line
+          x1={left}
+          y1={yIsaSvg}
+          x2={xWeight}
+          y2={yIsaSvg}
+          stroke="#374151"
+          strokeWidth="2.8"
+          strokeDasharray="8 5"
+        />
+        <text x={left - 12} y={yIsaSvg - 6} fontSize="11" textAnchor="end" fill="#374151">
+          DA temp korr.: {(yIsaAtWeight * 1000).toFixed(0)} ft
+        </text>
 
         <text
           x={(left + (width - right)) / 2}
