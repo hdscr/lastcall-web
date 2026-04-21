@@ -87,6 +87,7 @@ export const defaultPlan: FlightPlan = {
     qnh: 1013,
     windDirMag: 220,
     windSpeedKt: 12,
+    fieldElevation_ft: 1500,
   },
   temperatures: {
     alt1_ft: 1500,

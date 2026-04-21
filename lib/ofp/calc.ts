@@ -212,10 +212,16 @@ function evaluatePayload(plan: FlightPlan, config: OFPConfig, deltaIsa: number) 
   const CG_long = TOM_lbs > 0 ? round(longMoment / TOM_lbs, 2) : 0;
   const CG_lat = TOM_lbs > 0 ? round(latMoment / TOM_lbs, 2) : 0;
 
+  const fieldElevationFt = plan.weather.fieldElevation_ft ?? 0;
+  const pressureAltitude_ft = round(fieldElevationFt + (1013 - plan.weather.qnh) * 30, 0);
+  const densityAltitude_ft = round(pressureAltitude_ft + 120 * deltaIsa, 0);
   const pressureCorrection = (plan.weather.qnh - 1013) * 25;
   const tempPenalty = Math.max(0, deltaIsa) * 120;
   const massPenalty = Math.max(0, TOM_lbs - 2200) * 8;
-  const HOGE_ft = Math.max(0, Math.round(9000 - tempPenalty - massPenalty + pressureCorrection));
+  const hogeIsa = Math.max(0, Math.round(9000 - massPenalty));
+  const hogeQnhCorrected = Math.max(0, Math.round(hogeIsa + pressureCorrection));
+  const hogeDeltaIsaCorrected = Math.max(0, Math.round(hogeIsa - tempPenalty));
+  const HOGE_ft = Math.max(0, Math.round(hogeIsa - tempPenalty + pressureCorrection));
 
   const env = wc.cgEnvelope;
   const inLongRange = CG_long >= env.longMin && CG_long <= env.longMax;
@@ -224,7 +230,21 @@ function evaluatePayload(plan: FlightPlan, config: OFPConfig, deltaIsa: number) 
   const inLatPolygon = pointInPolygon({ x: CG_long, y: CG_lat }, env.lateralPoints);
   const inEnvelope = inLongRange && inLatRange && inLongPolygon && inLatPolygon;
 
-  return { TOM_lbs, CG_long, CG_lat, HOGE_ft, inEnvelope };
+  return {
+    TOM_lbs,
+    CG_long,
+    CG_lat,
+    HOGE_ft,
+    pressureAltitude_ft,
+    densityAltitude_ft,
+    hogeScenarios_ft: {
+      isa: hogeIsa,
+      qnhCorrected: hogeQnhCorrected,
+      deltaIsaCorrected: hogeDeltaIsaCorrected,
+      final: HOGE_ft,
+    },
+    inEnvelope,
+  };
 }
 
 export function evaluateFlightPlan(plan: FlightPlan, config: OFPConfig): EvaluatedPlan {
