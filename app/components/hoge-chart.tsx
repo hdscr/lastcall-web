@@ -4,6 +4,7 @@ import type { HOGELineConfig } from "@/lib/ofp/types";
 
 type Props = {
   lines: HOGELineConfig[];
+  isaDeviationC: number;
 };
 
 const X_MIN = 1700;
@@ -39,13 +40,77 @@ function strokeWidth(width: HOGELineConfig["width"]): number {
   return 1.2;
 }
 
-export function HOGEChart({ lines }: Props) {
+type XYLine = {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+
+function intersection(a: XYLine, b: XYLine): { x: number; y: number } | null {
+  const x1 = a.x1;
+  const y1 = a.y1;
+  const x2 = a.x2;
+  const y2 = a.y2;
+  const x3 = b.x1;
+  const y3 = b.y1;
+  const x4 = b.x2;
+  const y4 = b.y2;
+
+  const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  if (Math.abs(den) < 1e-9) return null;
+
+  const px =
+    ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / den;
+  const py =
+    ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / den;
+  return { x: px, y: py };
+}
+
+function yAtX(line: XYLine, x: number): number {
+  if (Math.abs(line.x2 - line.x1) < 1e-9) return line.y1;
+  const t = (x - line.x1) / (line.x2 - line.x1);
+  return line.y1 + t * (line.y2 - line.y1);
+}
+
+function correctedIsaLine(isaDevC: number): XYLine {
+  const isaStandard: XYLine = { x1: 1960, y1: 12.0, x2: 2490, y2: 5.1 };
+  const line10: XYLine = { x1: 2013, y1: 10.19, x2: 2475, y2: 5.097 };
+  const line40: XYLine = { x1: 2097, y1: 7.35, x2: 2425, y2: 3.81 };
+  const lineM30: XYLine = { x1: 1900, y1: 14.0, x2: 2500, y2: 7.25 };
+
+  const p = intersection(isaStandard, line10);
+  if (!p) return isaStandard;
+
+  const y10 = yAtX(line10, p.x);
+  const y40 = yAtX(line40, p.x);
+  const yM30 = yAtX(lineM30, p.x);
+
+  let offset = 0;
+  if (isaDevC >= 0) {
+    const t = Math.max(0, Math.min(1, isaDevC / 30));
+    offset = t * (y40 - y10); // positive ISA -> down
+  } else {
+    const t = Math.max(0, Math.min(1, Math.abs(isaDevC) / 40));
+    offset = t * (yM30 - y10); // negative ISA -> up
+  }
+
+  return {
+    x1: isaStandard.x1,
+    y1: isaStandard.y1 + offset,
+    x2: isaStandard.x2,
+    y2: isaStandard.y2 + offset,
+  };
+}
+
+export function HOGEChart({ lines, isaDeviationC }: Props) {
   const width = 860;
   const height = 420;
   const left = 80;
   const right = 24;
   const top = 24;
   const bottom = 58;
+  const isaCorr = correctedIsaLine(isaDeviationC);
 
   return (
     <div className="rounded border bg-white p-3 md:col-span-4">
@@ -104,6 +169,25 @@ export function HOGEChart({ lines }: Props) {
             ) : null}
           </g>
         ))}
+
+        <g>
+          <line
+            x1={xToSvg(isaCorr.x1, width, left, right)}
+            y1={yToSvg(isaCorr.y1, height, top, bottom)}
+            x2={xToSvg(isaCorr.x2, width, left, right)}
+            y2={yToSvg(isaCorr.y2, height, top, bottom)}
+            stroke="#dc2626"
+            strokeWidth="2.4"
+          />
+          <text
+            x={xToSvg(isaCorr.x1, width, left, right) + 8}
+            y={yToSvg(isaCorr.y1, height, top, bottom) - 8}
+            fontSize="11"
+            fill="#dc2626"
+          >
+            ISA Temperatur Korrigiert ({isaDeviationC.toFixed(1)}°C)
+          </text>
+        </g>
 
         <text
           x={(left + (width - right)) / 2}
