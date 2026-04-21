@@ -3,6 +3,7 @@
 import { evaluateFlightPlan, toHHMM } from "@/lib/ofp/calc";
 import { defaultConfig, defaultPlan } from "@/lib/ofp/seeds";
 import type { EnvelopePoint, FlightPlan, LegInput, LegType } from "@/lib/ofp/types";
+import { CGEnvelopePlot } from "./cg-envelope-plot";
 import { CGEnvelopeTable } from "./cg-envelope-table";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -265,6 +266,16 @@ export function FlightPlanEditor({ initialSavedPlans }: { initialSavedPlans: Pla
             xLabel="CG lat (in)"
             points={latEnvelope}
             onChange={setLatEnvelope}
+          />
+        </div>
+        <div className="md:col-span-4">
+          <CGEnvelopePlot
+            longPoints={longEnvelope}
+            latPoints={latEnvelope}
+            currentLong={evaluated.payloadOutputs.CG_long}
+            currentLat={evaluated.payloadOutputs.CG_lat}
+            tomLbs={evaluated.payloadOutputs.TOM_lbs}
+            inEnvelope={evaluated.payloadOutputs.inEnvelope}
           />
         </div>
       </section>
